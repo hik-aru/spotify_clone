@@ -1,0 +1,47 @@
+version: '3'
+services:
+  web:
+    container_name: laravel_nginx
+    image: nginx:1.14.2
+    ports:
+      - "8888:80"
+    volumes:
+      - ./docker/web/default.conf:/etc/nginx/conf.d/default.conf
+      - .:/var/www/html
+    depends_on:
+      - php
+  php:
+    container_name: laravel_php
+    build: ./docker/php
+    volumes:
+      - .:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - mysql
+  mysql:
+    container_name: laravel_mysql
+    image: mysql:5.7
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=dine
+  phpmyadmin:
+    container_name: laravel_phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=password
+    ports:
+      - 8889:80
+    volumes:
+      - /sessions
+    links:
+      - mysql
+
+volumes:
+  mysql-data:
